@@ -1,86 +1,81 @@
 # RodoviariaOS
 
-**Sistema de gestão para revendas de carros seminovos (SaaS multi-tenant).**
-Acompanha a operação inteira: do cliente que chega pelo WhatsApp até o dinheiro no caixa de cada sócio.
+**O sistema que organiza uma revenda de carros seminovos: do primeiro "oi" no WhatsApp até o dinheiro no caixa de cada sócio.**
 
-Nasceu na revenda da minha família. Eu trabalhava no atendimento e nos anúncios e via todo dia cliente se perdendo no WhatsApp, financeiro em planilha e sócio fazendo acerto à mão no fim do mês. Hoje o sistema roda na loja.
+Nasceu na revenda da minha família, onde eu cuidava do atendimento e dos anúncios. Hoje é usado todos os dias na loja.
 
-> 🔒 Este é um repositório de **vitrine**. O código-fonte é fechado, porque o projeto vai virar produto. Aqui estão o problema, as funcionalidades, a arquitetura e as decisões técnicas.
-
-**Status:** em produção numa revenda real, com dois sócios, usando dados reais da operação.
+> 🔒 Este repositório é uma vitrine. O código é fechado porque quero transformar o sistema em produto para outras revendas.
 
 ---
 
-## O problema
+## Para quem é
 
-Revendas pequenas e médias costumam operar com o WhatsApp no celular de cada vendedor, planilha no financeiro e um sistema de estoque engessado. Na prática:
+Para revendas pequenas e médias, em geral com mais de um sócio, alguns vendedores e um financeiro que até hoje vive em planilha.
 
-- o lead se perde no WhatsApp, e ninguém sabe de onde ele veio nem se virou venda;
-- quando a loja tem mais de um sócio, cada um tem carros e caixa próprios, mas eles dividem as despesas da loja, e o acerto entre eles é feito à mão;
-- o retorno do financiamento (a comissão paga pelo banco), os impostos e os repasses são calculados em planilha;
-- quem paga anúncio não sabe qual anúncio vendeu qual carro.
+## Como era antes
 
-## Fluxo principal
+- O cliente mandava mensagem no WhatsApp pessoal de um vendedor. Se o vendedor esquecia de responder, ninguém ficava sabendo.
+- A loja pagava anúncio no Instagram e no Facebook, mas não sabia qual anúncio tinha trazido o cliente que comprou.
+- Cada sócio tinha os próprios carros, mas as despesas da loja eram divididas à mão no fim do mês.
+- Custo do carro, comissão do banco no financiamento e impostos ficavam espalhados em planilhas.
+
+## Como fica: a vida de um carro e de um cliente
 
 ```mermaid
 flowchart LR
-    A[Anúncio no Meta<br/>clique para o WhatsApp] -.origem.-> B
-    W[Mensagem no WhatsApp] -->|webhook assinado| B[Lead<br/>sem telefone duplicado]
-    B --> C[Distribuição<br/>para um vendedor]
-    C --> D[Filas: recontato<br/>e descarte padronizado]
-    D --> E[Negociação<br/>ligada a um carro do estoque]
-    E --> F[Venda<br/>proposta, pagamento, contrato]
-    F --> G[Lançamentos<br/>com dono definido]
-    G --> H[Financeiro por sócio<br/>DRE e acerto das despesas comuns]
+    A[A loja compra<br/>um carro] --> B[Cliente manda<br/>mensagem]
+    B --> C[Vendedor<br/>atende]
+    C --> D[Venda<br/>fechada]
+    D --> E[Dinheiro no caixa<br/>do sócio certo]
 ```
 
-## Funcionalidades
+1. **A loja compra um carro.** Ele ganha uma ficha com o preço pago, a tabela FIPE e tudo o que se gasta para deixá-lo pronto para venda. Antes da compra, o sistema ajuda a avaliar oportunidades em portais de classificados e mostra os defeitos mais conhecidos do modelo.
+2. **Um cliente manda mensagem.** Pode vir de um anúncio ou direto no WhatsApp da loja. A conversa entra no sistema sozinha, vai para a fila de um vendedor e fica marcada com o anúncio e o carro que trouxeram o cliente.
+3. **O vendedor atende.** Ele vê quem precisa de resposta agora e quem precisa de um novo contato. Se o cliente desiste, o vendedor registra o motivo. Se chega à loja um carro que outro cliente estava procurando, o sistema avisa.
+4. **A venda fecha.** A proposta junta entrada, financiamento e carro na troca, e o contrato sai do sistema. Quando o último pagamento cai, a venda é encerrada sozinha. Se a venda é desfeita, o histórico continua guardado.
+5. **O dinheiro chega ao sócio certo.** O resultado do carro vai para o caixa do sócio dono dele, e as despesas da loja são divididas entre os sócios automaticamente. O sistema também calcula a comissão que o banco paga pelo financiamento e os impostos. O extrato do banco pode ser importado, e o sistema aprende a classificar cada lançamento.
 
-### ✅ Em produção
+## O que cada pessoa vê
 
-- **CRM ligado ao WhatsApp.** A mensagem chega por webhook assinado e vira lead sem duplicar o telefone. O lead é distribuído para um vendedor e entra em filas do que fazer agora, com recontato e motivos de descarte padronizados. A conversa atualiza na tela em tempo real.
-- **Origem do lead.** O lead que vem de um anúncio do Meta (clique para o WhatsApp) fica ligado à campanha e ao carro. Um relatório mostra o caminho da origem até a negociação e a venda.
-- **Estoque como dossiê do carro.** Cada carro guarda custo, despesas, preparação, documentos, interessados, negociação e resultado. Tem consulta FIPE e por placa, e avisa quando um carro que entra combina com o interesse de um cliente.
-- **Vendas.** Proposta, composição do pagamento (sinal, financiamento, troca), contrato e liquidação automática quando o último recebível é baixado. Também cobre distrato sem apagar histórico, pós-venda e garantia.
-- **Financeiro por sócio.** Contas, lançamentos previstos e realizados, DRE e acerto automático das despesas comuns entre os sócios. Importa extratos em OFX, CSV, XLSX e PDF (com leitor próprio por banco), sugere a categoria e aprende regras automáticas. Calcula o retorno do financiamento por faixa e apura impostos, com exportação.
-- **Visão por sócio.** Cada sócio vê os próprios carros e resultados. O estoque do outro aparece como catálogo.
-- **Perfis de acesso.** Dono, vendedor, marketing, fiscal/contabilidade e administrador, cada um vendo só o que precisa. O vendedor nunca vê custo nem margem.
-- **Agente de IA no WhatsApp para a equipe.** Responde sobre estoque, leads e números, com as permissões de quem pergunta. Ação que grava algo só é executada depois de confirmação humana. Manda resumo diário (opcional) e respeita um teto mensal de gasto com IA. Funciona com Anthropic ou OpenAI, com chave por loja. O sistema funciona inteiro sem IA.
-- **Radar de compra (fase 1).** Buscas salvas num portal de classificados, nota de oportunidade e análise, feita por IA, dos defeitos conhecidos do modelo, para ajudar a decidir o que comprar.
-- **Migração.** Estoque e clientes importados do sistema que a loja usava antes.
-
-### ⏸️ Pronto, mas desligado até a loja conectar as contas
-
-- **Marketing.** Cria o anúncio no Meta a partir do carro e pausa o anúncio quando o carro é vendido ou reservado. Gastar dinheiro sempre pede confirmação e respeita um teto de verba. Também guarda as mídias de cada carro no Google Drive, publica no Instagram, Facebook, TikTok, YouTube e Google Meu Negócio, e usa IA para legendas e transcrição de vídeo. Cada loja conecta as próprias contas por login (OAuth), com o token guardado cifrado.
-
-### 🚧 Em andamento
-
-- Simulação de financiamento automatizada nos portais dos bancos (Playwright), em rodadas de teste. Login e CAPTCHA continuam com uma pessoa.
-- Site público da loja ligado ao estoque. A primeira fase está no ar, e publicar os carros depende das fotos.
-- Publicação automática em portais de classificados.
-
-## Stack
-
-| Camada | Tecnologia |
+| Quem | O que vê no sistema |
 |---|---|
-| Frontend | Next.js 15 (App Router), React 19, TypeScript, Tailwind CSS 4 |
-| API | Fastify 5, TypeScript, Zod |
-| Banco | PostgreSQL, Drizzle ORM, Row Level Security |
-| Autenticação | JWT de 15 min com refresh rotativo, cookies httpOnly, Argon2 |
-| WhatsApp | WAHA, com webhooks assinados (HMAC-SHA256) |
-| Tempo real | Server-Sent Events |
-| IA | Anthropic Claude ou OpenAI, com chave e orçamento por loja |
-| Automação de navegador | Playwright |
-| Testes | Vitest contra banco real, com suítes de ponta a ponta de isolamento |
+| **Vendedor** | A fila de clientes, as conversas e o estoque. Não vê custo nem margem dos carros. |
+| **Sócio** | Os próprios carros, o próprio caixa e o resultado do mês. Os carros do outro sócio aparecem só como catálogo. |
+| **Marketing** | Os anúncios e quantos clientes e vendas cada um trouxe. |
+| **Contabilidade** | Lançamentos, impostos e extratos. |
 
-## Decisões técnicas
+A equipe também pode perguntar ao sistema pelo WhatsApp sobre estoque, clientes e números. Quando o pedido muda alguma coisa, ele só executa depois de uma pessoa confirmar. Esse assistente é opcional: a loja usa tudo sem ele.
 
-- **Isolamento que falha fechado.** A separação entre lojas e entre sócios é feita no próprio PostgreSQL (Row Level Security), e não só na tela. Toda consulta roda com o contexto da loja e do usuário, e sem contexto ela falha. Um teste quebra se alguém criar uma tabela sem política de isolamento.
-- **Dinheiro só como lançamento.** Venda, despesa, comissão e distrato viram lançamentos com dono definido. O distrato cria lançamentos novos em vez de editar a venda.
-- **Histórico imutável.** Mudar uma taxa nunca altera uma operação antiga.
-- **IA com freio.** O agente propõe, a pessoa confirma e só então ele executa, com auditoria. Gastar com anúncio também exige confirmação e teto.
-- **Deploy por etapas.** Cada deploy tem roteiro, backup antes e conferência automática antes de seguir.
+## Em que pé está
+
+**Em uso na loja:** atendimento pelo WhatsApp, origem dos clientes, ficha dos carros, vendas, financeiro por sócio, perfis de acesso, assistente no WhatsApp e avaliação de compra.
+
+**Pronto, esperando a loja conectar as contas:** criar o anúncio a partir da ficha do carro e pausá-lo quando o carro é vendido, além de publicar no Instagram, Facebook, TikTok, YouTube e Google Meu Negócio. Gastar com anúncio sempre pede confirmação e respeita um limite de verba.
+
+**Em andamento:**
+- simulação de financiamento direto nos sites dos bancos;
+- site da loja mostrando o estoque atualizado;
+- publicação automática nos portais de classificados.
+
+---
+
+## Por dentro (para quem é da área)
+
+| Parte | Tecnologia |
+|---|---|
+| Telas | Next.js, React, TypeScript, Tailwind CSS |
+| API | Fastify, TypeScript, Zod |
+| Banco de dados | PostgreSQL, Drizzle ORM |
+| WhatsApp | WAHA, com mensagens recebidas por webhook assinado |
+| Atualização em tempo real | Server-Sent Events |
+| Testes | Vitest, rodando contra um banco de verdade |
+
+Algumas decisões que tomei:
+
+- **Separação entre sócios no próprio banco.** O que cada sócio pode ver é garantido pelo PostgreSQL (Row Level Security), e não só escondido na tela. Se alguém criar uma tabela nova sem essa proteção, um teste quebra.
+- **Dinheiro só entra como lançamento.** Venda, despesa e comissão viram lançamentos com dono definido. Quando uma venda é desfeita, o sistema cria lançamentos novos em vez de apagar os antigos.
+- **O passado não muda.** Alterar uma taxa hoje não mexe nas vendas que já foram feitas.
 
 ## Contato
 
-Vitor Brosque · [LinkedIn](https://www.linkedin.com/in/vitorbrosque) · [GitHub](https://github.com/Vitor-Brosque)
+Vitor Brosque · [LinkedIn](https://www.linkedin.com/in/vitorbrosque) · [Portfólio](https://vitor-brosque.github.io)
