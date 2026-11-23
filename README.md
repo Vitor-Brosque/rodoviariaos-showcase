@@ -54,7 +54,7 @@ Ele não grava nada sozinho. Um lançamento só entra depois que a pessoa confir
 
 ## Marketing
 
-Esta parte está pronta e espera a loja conectar as contas. Ela cria o anúncio no Meta a partir do carro e pausa o anúncio quando o carro é vendido ou reservado. Gastar dinheiro sempre pede confirmação e respeita um teto de verba. Também publica os carros nas redes sociais da loja.
+Esta parte está pronta e espera a loja conectar as contas. Ela cria o anúncio no Meta a partir do carro e publica os carros nas redes sociais da loja.
 
 ## Como as partes se ligam
 
@@ -79,7 +79,7 @@ TypeScript · Next.js · Fastify · PostgreSQL
 
 ## Onde está hoje
 
-Em uso na loja. Agora estou trabalhando na simulação de financiamento nos bancos, no site da loja ligado ao estoque e na publicação automática dos carros em portais de classificados.
+Em uso na loja. Agora estou trabalhando no site da loja ligado ao estoque.
 
 ---
 
