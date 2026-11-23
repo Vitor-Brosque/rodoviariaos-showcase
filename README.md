@@ -10,7 +10,7 @@ O código é fechado: o sistema trabalha com dados reais da loja e quero transfo
 </p>
 <p align="center"><sub>O painel que a loja abre de manhã e o botão que esconde todos os valores da tela. Todas as imagens usam dados inventados de uma loja de demonstração.</sub></p>
 
-> **English summary.** RodoviariaOS is the system I built for my family's used car dealership in Bauru, Brazil, and it runs at the store every day. It started as a CRM that tells salespeople who needs a follow-up and records where each lead came from. A finance module that reads bank statements came next, and then an AI assistant that knows the store's inventory and leads. Built with TypeScript, Next.js, Fastify and PostgreSQL. The code is private; the screenshots use made-up demo data.
+> **English summary.** RodoviariaOS is the system I built for my family's used car dealership in Bauru, Brazil, and it runs at the store every day. It started as a CRM that tells salespeople who needs a follow-up and records where each lead came from. A finance module that reads bank statements came next, and then an AI assistant that knows the store's inventory and leads and can also be reached on WhatsApp by text, voice or photo. Built with TypeScript, Next.js, Fastify and PostgreSQL. The code is private; the screenshots use made-up demo data.
 
 ## Começou pelo CRM
 
@@ -39,7 +39,9 @@ Ele também ajuda nas questões tributárias e nas vendas, financiadas ou à vis
 
 A IA veio para juntar tudo. Funciona como um secretário que sabe tudo da loja: ajuda a organizar, entender o estoque e ver os leads que precisam de atenção.
 
-O assistente responde só com o que o usuário pode ver, e um lançamento só é gravado depois que a pessoa confirma.
+O mesmo assistente do vídeo também atende pelo WhatsApp. Dá para falar com ele por mensagem, áudio ou foto, sem abrir o sistema.
+
+Ele responde só com o que o usuário pode ver, e um lançamento só é gravado depois que a pessoa confirma por escrito. Confirmação por áudio não vale, porque a transcrição pode errar.
 
 https://github.com/user-attachments/assets/62e7a452-e5ea-4834-b083-531190ff87bf
 
@@ -54,6 +56,7 @@ flowchart LR
     FIN --> MES["Despesas, lucro<br>e prejuízo do mês"]
     CRM --> IA["Assistente com IA"]
     ESTOQUE["Estoque"] --> IA
+    ZAP["Mensagem, áudio ou foto<br>no WhatsApp"] <--> IA
 ```
 
 ## Feito com
