@@ -94,9 +94,7 @@ flowchart LR
     IA <--> EQUIPE["Equipe no WhatsApp:<br>mensagem, áudio ou foto"]
 ```
 
-## Por dentro
-
-Para quem é da área.
+## Decisões técnicas
 
 **Stack:** TypeScript · Next.js · React · Fastify · PostgreSQL · Drizzle · Zod · Vitest
 
@@ -112,8 +110,6 @@ Para quem é da área.
 
 **Deploy em etapas.** Cada etapa só começa se a anterior passou: testes, backup do banco, migrations numa transação, build fora da pasta em produção e troca com rollback automático.
 
-**Um problema que ensinou bastante.** Em setembro de 2026, todas as conexões com o banco ficaram presas e o login parou de responder. A causa era um trecho que, dentro de uma transação, pedia uma segunda conexão ao mesmo pool; uma rajada de mensagens do WhatsApp fez todas esperarem por uma conexão que nunca vinha. O problema foi reproduzido em teste antes da correção. Hoje a transação é passada adiante em vez de abrir outra, há limite de mensagens processadas ao mesmo tempo, e o sistema devolve erro em vez de travar.
-
 ## Onde está hoje
 
 - **Em uso na loja:** o CRM com WhatsApp, desde julho de 2026, e o estoque, desde outubro.
@@ -123,4 +119,4 @@ Para quem é da área.
 
 ---
 
-Vitor Brosque · [LinkedIn](https://www.linkedin.com/in/vitorbrosque) · [Portfólio](https://vitor-brosque.github.io)
+Vitor Brosque · [LinkedIn](https://www.linkedin.com/in/vitorbrosque) · [Portfólio](https://vitor-brosque.github.io) · [Estudo de caso](https://vitor-brosque.github.io/projetos/rodoviariaos/)
